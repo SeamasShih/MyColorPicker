@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MyColorPicker</string>
+    <string name="hint">your text</string>
+    <string name="preview">preview</string>
+    <string name="go">go</string>
+    <string name="ok">ok</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="picker_entry_length">35dp</dimen>
+    <dimen name="previewTextSize">36sp</dimen>
+    <dimen name="editTextSize">30sp</dimen>
+</resources>
