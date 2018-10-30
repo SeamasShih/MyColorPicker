@@ -132,7 +132,7 @@ public class ColorPickerView extends View {
             case MotionEvent.ACTION_DOWN:
                 if (regionCircle.contains(x, y)) {
                     mode = REGION.CIRCLE;
-                    setCircleCursor(((float) (Math.atan2(y, x) * 180 / Math.PI) + 450) % 360);
+                    setCircleCursor((MyMath.getTheta(x, y) + 90) % 360);
                 } else if (regionTriangle.contains(x, y)) {
                     mode = REGION.TRIANGLE;
                     setPickerCursor(x, y);
@@ -141,25 +141,13 @@ public class ColorPickerView extends View {
             case MotionEvent.ACTION_MOVE:
                 switch (mode) {
                     case CIRCLE:
-                        setCircleCursor(((float) (Math.atan2(y, x) * 180 / Math.PI) + 450) % 360);
+                        setCircleCursor((MyMath.getTheta(x, y) + 90) % 360);
                         break;
                     case TRIANGLE:
                         if (regionTriangle.contains(x, y))
                             setPickerCursor(x, y);
                         else {
-                            float theta = ((float) (Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
-                            float r;
-                            PointF p;
-                            if (theta >= 30 && theta <= 150) {
-                                r = (float) Math.tan(Math.toRadians(theta - 90)) * (float) Math.sqrt(3) / 6 + .5f;
-                                p = MyMath.getPoint(pointFS[2], pointFS[1], r);
-                            } else if (theta > 150 && theta <= 270) {
-                                r = (float) Math.tan(Math.toRadians(theta - 210)) * (float) Math.sqrt(3) / 6 + .5f;
-                                p = MyMath.getPoint(pointFS[1], pointFS[0], r);
-                            } else {
-                                r = (float) Math.tan(Math.toRadians(theta - 330)) * (float) Math.sqrt(3) / 6 + .5f;
-                                p = MyMath.getPoint(pointFS[0], pointFS[2], r);
-                            }
+                            PointF p = calculatePointByStyle(x, y, 1);
                             setPickerCursor(p.x, p.y);
                         }
                         break;
@@ -172,6 +160,51 @@ public class ColorPickerView extends View {
         }
         performClick();
         return super.onTouchEvent(event);
+    }
+
+    private PointF calculatePointByStyle(float x, float y, int style) {
+        PointF p = new PointF(x, y);
+        float theta;
+        float r;
+        switch (style) {
+            case 0:
+                theta = MyMath.getTheta(x, y);
+                if (theta >= 30 && theta <= 150) {
+                    r = (float) Math.tan(Math.toRadians(theta - 90)) * (float) Math.sqrt(3) / 6 + .5f;
+                    p = MyMath.getPoint(pointFS[2], pointFS[1], r);
+                } else if (theta > 150 && theta <= 270) {
+                    r = (float) Math.tan(Math.toRadians(theta - 210)) * (float) Math.sqrt(3) / 6 + .5f;
+                    p = MyMath.getPoint(pointFS[1], pointFS[0], r);
+                } else {
+                    r = (float) Math.tan(Math.toRadians(theta - 330)) * (float) Math.sqrt(3) / 6 + .5f;
+                    p = MyMath.getPoint(pointFS[0], pointFS[2], r);
+                }
+                break;
+            case 1:
+                theta = MyMath.getTheta(x, y, pointFS[0]);
+                if (theta >= 240 && theta < 300) {
+                    p.set(pointFS[0]);
+                } else if (theta >= 60 && theta < 120) {
+                    r = (float) Math.tan(Math.toRadians(theta - 90)) * (float) Math.sqrt(3) / 2 + .5f;
+                    p = MyMath.getPoint(pointFS[2], pointFS[1], r);
+                }
+                theta = MyMath.getTheta(x, y, pointFS[1]);
+                if (theta >= 120 && theta < 180) {
+                    p.set(pointFS[1]);
+                } else if (theta >= 300 && theta < 360) {
+                    r = (float) Math.tan(Math.toRadians(theta - 330)) * (float) Math.sqrt(3) / 2 + .5f;
+                    p = MyMath.getPoint(pointFS[0], pointFS[2], r);
+                }
+                theta = MyMath.getTheta(x, y, pointFS[2]);
+                if (theta >= 0 && theta < 60) {
+                    p.set(pointFS[2]);
+                } else if (theta >= 180 && theta < 240) {
+                    r = (float) Math.tan(Math.toRadians(theta - 210)) * (float) Math.sqrt(3) / 2 + .5f;
+                    p = MyMath.getPoint(pointFS[1], pointFS[0], r);
+                }
+                break;
+        }
+        return p;
     }
 
     @Override
@@ -301,6 +334,14 @@ public class ColorPickerView extends View {
 
         private static float getDistanceFromPointToPoint(PointF a, PointF b) {
             return (float) Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+        }
+
+        private static float getTheta(float x, float y) {
+            return ((float) (Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+        }
+
+        private static float getTheta(float x, float y, PointF c) {
+            return getTheta(x - c.x, y - c.y);
         }
     }
 }
